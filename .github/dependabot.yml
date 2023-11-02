@@ -1,15 +1,24 @@
----
+# Basic `dependabot.yml` file 
+
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    # Look for `package.json` and `lock` files in the `root` directory
+    directory: "/"
+    # Check the npm registry for updates every day (weekdays)
+    schedule:
+      interval: "daily"
+
+  # Enable version updates for Docker
+  - package-ecosystem: "docker"
+    # Look for a `Dockerfile` in the `root` directory
     directory: "/"
     schedule:
       interval: "weekly"
-  - package-ecosystem: npm
-    directory: "/javascript"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: bundler
-    directory: "/ruby"
+
+  # Enable version updates for GitHub Actions    
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: "weekly"
