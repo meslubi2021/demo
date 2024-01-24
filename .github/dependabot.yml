@@ -10,6 +10,6 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: bundler
-    directory: "/ruby"
+    directory: "/ruby"emo
     schedule:
       interval: "weekly"
