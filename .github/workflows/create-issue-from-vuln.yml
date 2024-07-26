@@ -1,0 +1,35 @@
+name: CreateDependabotIssue
+on:
+  workflow_dispatch:
+
+jobs:
+  check_dependabot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Fetch Dependabot alerts
+        env:
+          GH_TOKEN: ${{ secrets.TB_PAT }}
+          REPO: ${{ github.repository }}  # Add this line
+        run: |
+          alerts=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/$REPO/dependabot/alerts)
+          echo "$alerts" | jq -c '.[]' | while read -r alert; do
+
+            number=$(echo $alert | jq -r '.number')
+            summary=$(echo $alert | jq -r '.security_advisory.summary') 
+            description=$(echo $alert | jq -r '.security_advisory.description')
+            severity=$(echo $alert | jq -r '.security_advisory.severity' | tr '[:lower:]' '[:upper:]')
+            url=$(echo $alert | jq -r '.url')
+
+            issue_title="[$severity] $summary | #$number"
+            issue_body="# Dependabot Vulnerability Alert\n\n## Description\n$description\n\n$url"
+            
+            existing_issues=$(gh issue list --search "$issue_title in:title")
+            if [ -z "$existing_issues" ]; then
+              echo -e "$issue_body" | gh issue create --title "$issue_title" -l dependabot-vuln --body-file -
+            else
+                echo "Issues already exists for $issue_title"
+            fi
+          done
